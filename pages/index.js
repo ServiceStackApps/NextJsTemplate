@@ -2,7 +2,7 @@ import fs from 'fs'
 import matter from 'gray-matter'
 import Link from 'next/link'
 import path from 'path'
-import Layout from '../components/Layout'
+import Layout from '../src/components/Layout'
 import { postFilePaths, POSTS_PATH } from '../utils/mdxUtils'
 
 export default function Index({ posts }) {
