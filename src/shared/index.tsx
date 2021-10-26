@@ -11,14 +11,14 @@ if (typeof global === 'undefined') {
   (window as any).global = window;
 }
 
-export let client = new JsonServiceClient('/api');
+export let client = new JsonServiceClient('/');
 
 const isNode = typeof process === 'object' &&
   typeof process.versions === 'object' &&
   typeof process.versions.node !== 'undefined';
 if (isNode) {
   const packageConfig = require("../../package.json");
-  let baseUrl = packageConfig["proxy"] ?? '/api'
+  let baseUrl = packageConfig["proxy"] ?? '/'
   client = new JsonServiceClient(baseUrl);
   if (baseUrl.startsWith("https://localhost") || baseUrl.startsWith("https://127.0.0.1")) {
     // allow self-signed certs
