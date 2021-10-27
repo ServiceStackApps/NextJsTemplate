@@ -31,7 +31,8 @@
     "strictPropertyInitialization": false
   },
   "exclude": [
-    "node_modules"
+    "node_modules",
+    "NextJsTemplateApi"
   ],
   "include": [
     "next-env.d.ts",
