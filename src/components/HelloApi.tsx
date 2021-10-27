@@ -12,6 +12,7 @@ export default function HelloApi(props:HelloApiProps) {
 
     React.useEffect(() => {
         (async () => {
+            console.log(name)
             if(!name) {
                 setResult('')
             } else {
