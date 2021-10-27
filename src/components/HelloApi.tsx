@@ -12,12 +12,10 @@ export default function HelloApi(props:HelloApiProps) {
 
     React.useEffect(() => {
         (async () => {
-            console.log(name)
             if(!name) {
                 setResult('')
             } else {
                 let response = await client.get(new Hello({ name }) );
-                console.log(response)
                 setResult(response.result)
             }
         })();
@@ -25,8 +23,9 @@ export default function HelloApi(props:HelloApiProps) {
 
     return (<div>
         <div className="form-group" role="form">
-            <input id="txtName" value={name} onInput={e => setName(e.currentTarget.value)} placeholder="Your name" />
-            <h3 className="result pt-2">{ result }</h3>
+            <input id="txtName" value={name} className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                   onInput={e => setName(e.currentTarget.value)} placeholder="Your name" />
+            <h3 className="block text-gray-700 text-lg font-bold mb-2">{ result }</h3>
         </div>
     </div>);
 
