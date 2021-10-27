@@ -1,5 +1,4 @@
 import * as React from 'react';
-import { Input } from '@servicestack/react';
 import {client} from "../shared";
 import { Hello } from '../shared/dtos';
 
@@ -17,9 +16,14 @@ export default function HelloApi(props:HelloApiProps) {
         })();
     }, [name]); // fires when name changes
 
+    const handleChange = (name: any) => {
+        console.log(name.target.value)
+        setName(name.target.value);
+    }
+
     return (<div>
         <div className="form-group" role="form">
-            <Input id="txtName" value={name} onChange={setName} placeholder="Your name" />
+            <input id="txtName" value={name} onChange={handleChange} placeholder="Your name" />
             <h3 className="result pt-2">{ result }</h3>
         </div>
     </div>);
