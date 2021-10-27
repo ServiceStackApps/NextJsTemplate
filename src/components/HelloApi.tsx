@@ -12,7 +12,13 @@ export default function HelloApi(props:HelloApiProps) {
 
     React.useEffect(() => {
         (async () => {
-            setResult(!name ? '' : (await client.get(new Hello({ name }) )).result)
+            if(!name) {
+                setResult('')
+            } else {
+                let response = await client.get(new Hello({ name }) );
+                console.log(response)
+                setResult(response.result)
+            }
         })();
     }, [name]); // fires when name changes
 
