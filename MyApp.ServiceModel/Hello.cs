@@ -1,6 +1,6 @@
 using ServiceStack;
 
-namespace NextJsTemplateApi.ServiceModel
+namespace MyApp.ServiceModel
 {
     [Route("/hello")]
     [Route("/hello/{Name}")]

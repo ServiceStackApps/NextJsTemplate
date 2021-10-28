@@ -4,7 +4,7 @@ on:
   pull_request: {}
   push:
     paths:
-      - 'NextJsTemplateApi*'
+      - 'MyApp*'
       - 'Dockerfile'
       - 'NuGet.Config'
 
@@ -33,5 +33,5 @@ jobs:
             echo TESTS FAILED
             exit 1
           fi
-        working-directory: ./NextJsTemplateApi.Tests
+        working-directory: ./MyApp.Tests
 

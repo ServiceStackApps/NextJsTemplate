@@ -6,9 +6,9 @@ using Microsoft.Extensions.Configuration;
 using Funq;
 using ServiceStack;
 using ServiceStack.Configuration;
-using NextJsTemplateApi.ServiceInterface;
+using MyApp.ServiceInterface;
 
-namespace NextJsTemplateApi
+namespace MyApp
 {
     public class Startup : ModularStartup
     {
@@ -35,7 +35,7 @@ namespace NextJsTemplateApi
 
     public class AppHost : AppHostBase
     {
-        public AppHost() : base("NextJsTemplateApi", typeof(MyServices).Assembly) { }
+        public AppHost() : base("MyApp", typeof(MyServices).Assembly) { }
 
         // Configure your AppHost with the necessary configuration and dependencies your App needs
         public override void Configure(Container container)

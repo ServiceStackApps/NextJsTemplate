@@ -1,8 +1,8 @@
 using System;
 using ServiceStack;
-using NextJsTemplateApi.ServiceModel;
+using MyApp.ServiceModel;
 
-namespace NextJsTemplateApi.ServiceInterface
+namespace MyApp.ServiceInterface
 {
     public class MyServices : Service
     {

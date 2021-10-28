@@ -13,8 +13,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\NextJsTemplateApi.ServiceInterface\NextJsTemplateApi.ServiceInterface.csproj" />
-    <ProjectReference Include="..\NextJsTemplateApi.ServiceModel\NextJsTemplateApi.ServiceModel.csproj" />
+    <ProjectReference Include="..\MyApp.ServiceInterface\MyApp.ServiceInterface.csproj" />
+    <ProjectReference Include="..\MyApp.ServiceModel\MyApp.ServiceModel.csproj" />
   </ItemGroup>
 
 </Project>

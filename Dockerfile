@@ -4,10 +4,10 @@ WORKDIR /app
 COPY . .
 RUN dotnet restore
 
-WORKDIR /app/NextJsTemplateApi
+WORKDIR /app/MyApp
 RUN dotnet publish -c release -o /out --no-restore
 
 FROM mcr.microsoft.com/dotnet/aspnet:5.0 AS runtime
 WORKDIR /app
 COPY --from=build /out .
-ENTRYPOINT ["dotnet", "NextJsTemplateApi.dll"]
+ENTRYPOINT ["dotnet", "MyApp.dll"]

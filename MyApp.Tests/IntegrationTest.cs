@@ -1,10 +1,10 @@
 using Funq;
 using ServiceStack;
 using NUnit.Framework;
-using NextJsTemplateApi.ServiceInterface;
-using NextJsTemplateApi.ServiceModel;
+using MyApp.ServiceInterface;
+using MyApp.ServiceModel;
 
-namespace NextJsTemplateApi.Tests
+namespace MyApp.Tests
 {
     public class IntegrationTest
     {

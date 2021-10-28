@@ -1,10 +1,10 @@
 using NUnit.Framework;
 using ServiceStack;
 using ServiceStack.Testing;
-using NextJsTemplateApi.ServiceInterface;
-using NextJsTemplateApi.ServiceModel;
+using MyApp.ServiceInterface;
+using MyApp.ServiceModel;
 
-namespace NextJsTemplateApi.Tests
+namespace MyApp.Tests
 {
     public class UnitTest
     {

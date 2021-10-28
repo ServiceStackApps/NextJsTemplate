@@ -32,7 +32,7 @@
   },
   "exclude": [
     "node_modules",
-    "NextJsTemplateApi"
+    "MyApp"
   ],
   "include": [
     "next-env.d.ts",

@@ -6,7 +6,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using ServiceStack;
 
-namespace NextJsTemplateApi
+namespace MyApp
 {
     public class Program
     {
