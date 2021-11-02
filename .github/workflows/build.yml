@@ -4,9 +4,8 @@ on:
   pull_request: {}
   push:
     paths:
-      - 'MyApp*'
       - 'Dockerfile'
-      - 'NuGet.Config'
+      - './api/MyApp.sln'
 
 jobs:
   build:
@@ -22,7 +21,7 @@ jobs:
 
       - name: build
         run: dotnet build
-        working-directory: .
+        working-directory: ./api
 
       - name: test
         run: |
@@ -33,5 +32,4 @@ jobs:
             echo TESTS FAILED
             exit 1
           fi
-        working-directory: ./MyApp.Tests
-
+        working-directory: ./api/MyApp.Tests
