@@ -1,11 +1,5 @@
 using MyApp;
-using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
 using ServiceStack;
-using ServiceStack.Auth;
 
 var builder = WebApplication.CreateBuilder(args);
 
