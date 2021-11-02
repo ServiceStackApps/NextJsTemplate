@@ -1,30 +1,60 @@
 import Link from 'next/link'
+import { useRouter } from 'next/router'
 import useAuth from '../lib/useAuth'
+import { PrimaryButton, Button } from './form'
+
+type NavItem = { 
+    href?:string, 
+    name:string, 
+    type?:string,
+    show?:string,
+    hide?:string,
+    onClick?:(e:any) => void
+}
 
 export default function () {
+    const router = useRouter()
 
-    let items:{href?:string,name:string,onClick?:(e:any) => void}[] = [
-        { href: '/', name: 'home' },
-        { href: '/about', name: 'about'},
+    let items:NavItem[] = [
+        { href: '/about', name: 'About'},
     ]
 
-    let { auth, signout } = useAuth()
+    let { auth, attrs, signout } = useAuth()
     if (auth) {
         items.push(...[
-            { href:"/profile", name:"profile" },
-            { href:"/admin", name:"admin" },
-            { onClick: (e:any) => signout('/'), name:"sign out" },
+            { href:"/profile", name:"Profile" },
+            { href:"/admin", name:"Admin", show:"role:Admin" },
+            { type:'Button', onClick: (e:any) => signout('/'), name:"Sign Out" },
         ])
     } else {
-        items.push({ href:"/signin", name:"sign in" })
+        items.push({ type:'Button', href:"/signin", name:"Sign In" })
+        items.push({ type:'PrimaryButton', href:"/signup", name:"Register" })
     }
+    let showItems = items.filter(x => {
+        if (x.show && attrs.indexOf(x.show) === -1) return false
+        if (x.hide && attrs.indexOf(x.hide) >= 0) return false
+        return true
+    })
 
-    return (<div>
-        <ul className="flex justify-end m-2 gap-x-2">
-            {items.map(x => <li key={x.name}>{x.href 
-                ? <Link href={x.href}><a className="hover:underline">{x.name}</a></Link> 
-                : <span className="cursor-pointer hover:underline" onClick={x.onClick}>{x.name}</span>}
-            </li>)}
-        </ul>
-    </div>)
+    return (<header className="border-b border-gray-200 pr-3">
+        <div className="flex flex-wrap items-center">
+            <div className="flex-shrink flex-grow-0">
+                <Link href="/">
+                    <div className="p-4 cursor-pointer"><img src="/favicon/favicon-32x32.png" alt="MyApp logo" /></div>
+                </Link>
+            </div>
+            <div className="flex flex-grow flex-shrink flex-nowrap justify-end items-center">
+                <nav className="relative flex flex-grow">
+                    <ul className="flex flex-wrap items-center justify-end w-full m-0">
+                        {showItems.map(x => <li key={x.name} className="relative flex flex-wrap just-fu-start m-0">{x.type === 'Button'
+                            ? <Button className="mx-2" href={x.href} onClick={x.onClick}>{x.name}</Button>
+                            : x.type == 'PrimaryButton'
+                                ? <PrimaryButton className="mx-2" href={x.href} onClick={x.onClick}>{x.name}</PrimaryButton>
+                                : <Link href={x.href!}><a className={`flex items-center justify-start mw-full p-4 hover:text-success${router.asPath === x.href ? ' text-success': ''}`}>{x.name}</a></Link> }
+                        </li>)}
+                    </ul>
+                </nav>
+            </div>
+        </div>
+    </header>)
 }

@@ -165,11 +165,11 @@ type ButtonProps = {
     children: React.ReactNode,
 } | any;
 export const PrimaryButton: FC<ButtonProps> = (props) => {
-    const { type, className, children, ...remaining } = props;
-    return (<button type={type ?? "submit"}
-        className={["inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500",className].join(' ')}
-      {...remaining}>{children}</button>  
-    )
+    const { type, className, href, children, ...remaining } = props;
+    let cls = ["inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500",className].join(' ');
+    return href
+        ? <Link href={href}><a className={cls} {...remaining}>{children}</a></Link>
+        : <button type={type ?? "submit"} className={cls} {...remaining}>{children}</button>
 }
 export const Button: FC<ButtonProps> = (props) => {
     const { type, className, href, children, ...remaining } = props;

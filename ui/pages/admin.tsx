@@ -1,17 +1,17 @@
 import Page from '../components/layout-page'
 import useAuth from '../lib/useAuth'
-import { UserIcon } from '@heroicons/react/outline'
+import { ShieldCheckIcon } from '@heroicons/react/outline'
 import React from 'react'
 import { Button } from '../components/form'
 
 export default () => {
-    let { auth, signout } = useAuth({ redirectTo:'/signin' })
+    let { auth, signout } = useAuth({ redirectTo:'/signin', requiredRole:'Admin' })
     if (!auth) return null
 
-    return (<Page title={auth?.displayName + ' Profile'}>
+    return (<Page title="Admin Page">
 
         <div className="flex flex-col items-center justify-center">
-            <UserIcon className="w-36 h-36 text-gray-700" />
+            <ShieldCheckIcon className="w-36 h-36 text-gray-700" />
             <div>{auth.displayName}</div>
             <div>{auth.userName}</div>
             <div className="mt-2">
