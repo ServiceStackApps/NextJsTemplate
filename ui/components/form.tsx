@@ -1,13 +1,16 @@
 import Link from 'next/link'
-import { ErrorResponse, errorResponse, errorResponseExcept } from '@servicestack/client';
-import { createContext, FC, SyntheticEvent, useContext, useEffect, useState } from 'react';
+import { ErrorResponse, errorResponse, errorResponseExcept } from '@servicestack/client'
+import { createContext, FC, SyntheticEvent, useContext, useEffect, useState } from 'react'
 import { ExclamationCircleIcon } from '@heroicons/react/solid'
 import { XCircleIcon } from '@heroicons/react/solid'
-import Router, { NextRouter, useRouter } from 'next/router';
-import useAuth from '../lib/useAuth';
+import Router, { NextRouter, useRouter } from 'next/router'
+import { ParsedUrlQuery } from 'querystring'
 
-export function getRedirect() {    
-    let { redirect } = Router.query
+import useAuth, { AuthenticatedContext } from '../lib/useAuth';
+import { Routes } from '../lib/gateway';
+
+export function getRedirect(query?:ParsedUrlQuery) {    
+    let { redirect } = (query ?? Router.query)
     return redirect && Array.isArray(redirect)
         ? redirect[0]
         : redirect
@@ -17,14 +20,49 @@ export const Redirecting : FC<any> = (props) => {
     return <Loading className="py-2 pl-4" text="redirecting ..." />
 }
 
-type FormState = { 
-    responseStatus?:ErrorResponse, 
-    didSubmit:boolean, 
+type ValidateAuthProps = {
+    requiredRole?: string,
+    requiredPermission?: string,
+    redirectTo?: string,
+    render: (ctx:AuthenticatedContext) => React.ReactElement,
+}
+export const ValidateAuth: FC<ValidateAuthProps> = ({ requiredRole, requiredPermission, redirectTo, render }) => {
+    const ctx = useAuth();
+    const { auth, signedIn, hasRole } = ctx;
+    redirectTo ??= useRouter().pathname
+
+    const shouldRedirect = () => !signedIn
+        ? Routes.signin(redirectTo)
+        : requiredRole && !hasRole(requiredRole)
+            ? Routes.forbidden()
+            : requiredPermission && !hasRole(requiredPermission)
+                ? Routes.forbidden()
+                : null;
+
+    useEffect(() => {
+        const goTo = shouldRedirect()
+        if (goTo) {
+            Router.replace(goTo)
+        }
+    }, [auth]);
+
+    if (shouldRedirect()) {
+        return <Redirecting />
+    }
+    
+    return render({ ...ctx, auth:ctx.auth! })
+}
+
+type FormState = {
+    responseStatus?:ErrorResponse,
+    didSubmit:boolean,
     loading:boolean,
 }
 export const FormContext = createContext<FormState>({ loading: false, didSubmit:false })
 export type SuccessContext<T> = { response?:T, router:NextRouter }
 export type SuccessEventHandler<T> = (ctx:SuccessContext<T>) => Promise<any> | void;
+
+FormContext.Consumer
 
 type FormProps = {
     className?: string,
@@ -40,8 +78,6 @@ export const Form: FC<FormProps> = (props) => {
     const [didSubmit, setDidSubmit] = useState(false)
     const router = useRouter()
 
-    const { mutate } = useAuth()
-
     const handleSubmit = async (e:SyntheticEvent<HTMLFormElement>) => {
         e.preventDefault()
         setDidSubmit(true)
@@ -53,7 +89,6 @@ export const Form: FC<FormProps> = (props) => {
 
                 let response = await onSubmit(e)
                 if (onSuccess) {
-                    //mutate() //revalidate
                     console.log('onSuccess', router.query, Router.query)
                     onSuccess({ response, router })
                 }
