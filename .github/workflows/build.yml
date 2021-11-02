@@ -11,26 +11,10 @@ jobs:
   build:
     runs-on: ubuntu-20.04
     steps:
-      - name: checkout
-        uses: actions/checkout@v2
-
-      - name: setup .net core
-        uses: actions/setup-dotnet@v1
-        with:
-          dotnet-version: '6.0'
-          include-prerelease: true
-
-      - name: build
-        run: dotnet build
-        working-directory: ./api
-
-      - name: test
-        run: |
-          dotnet test
-          if [ $? -eq 0 ]; then
-            echo TESTS PASSED
-          else
-            echo TESTS FAILED
-            exit 1
-          fi
-        working-directory: ./api/MyApp.Tests
+    - uses: actions/checkout@v2
+    - uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: '6.0'
+        include-prerelease: true
+    - run: dotnet build ./api
+    - run: dotnet test ./api/MyApp.Tests
