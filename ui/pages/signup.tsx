@@ -1,10 +1,11 @@
 import Page from '../components/layout-page'
-import { Form, FormLoading, ErrorSummary, Input, Checkbox, PrimaryButton } from '../components/form'
+import { Form, FormLoading, ErrorSummary, Input, Checkbox, PrimaryButton, IfAuthenticated, getRedirect, Redirecting } from '../components/form'
 import { client } from '../lib/gateway'
 import { Register } from '../lib/dtos'
-import { useState } from 'react'
-import { serializeToObject, leftPart, rightPart, toPascalCase, ErrorResponse, ResponseError, ResponseStatus, createError } from '@servicestack/client'
+import React, { useEffect, useState } from 'react'
+import { serializeToObject, leftPart, rightPart, toPascalCase, createError } from '@servicestack/client'
 import useAuth from '../lib/useAuth'
+import Router from 'next/router'
 
 export default () => {
 
@@ -20,10 +21,14 @@ export default () => {
         setPasswordValue('p@55wOrd')
     }
 
-    useAuth({ ifAuthenticatedRedirectTo:'/' })
-    
+    const { signedIn, mutate } = useAuth();
+    useEffect(() => {
+        if (signedIn) Router.replace(getRedirect() || "/");
+    }, [signedIn]);
+    if (signedIn) return <Redirecting />
+
     return (
-        <Page title="Sign In">
+        <Page title="Sign Up">
             <Form className="max-w-prose" 
                   onSubmit={e => { 
                       const { displayName, userName, password, confirmPassword, autoLogin } = serializeToObject(e.currentTarget);
@@ -32,7 +37,8 @@ export default () => {
                       }
                       return client.post(new Register({ displayName, email:userName, password, confirmPassword, autoLogin }))
                   }}
-                  onSuccess={async ctx => ctx.router.push('/about')}>
+                  onSuccess={ctx => mutate()}>
+                <IfAuthenticated redirectTo='/' />
                 <div className="shadow overflow-hidden sm:rounded-md">
                     <ErrorSummary except="displayName,userName,password,confirmPassword" />
                     <div className="px-4 py-5 bg-white space-y-6 sm:p-6">

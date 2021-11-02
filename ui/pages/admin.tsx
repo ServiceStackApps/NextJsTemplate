@@ -1,12 +1,17 @@
 import Page from '../components/layout-page'
 import useAuth from '../lib/useAuth'
 import { ShieldCheckIcon } from '@heroicons/react/outline'
-import React from 'react'
-import { Button } from '../components/form'
+import React, { useEffect } from 'react'
+import { Button, Redirecting } from '../components/form'
+import Router from 'next/router'
 
 export default () => {
-    let { auth, signout } = useAuth({ redirectTo:'/signin', requiredRole:'Admin' })
-    if (!auth) return null
+    const { auth, signedIn, signout, hasRole } = useAuth();
+    useEffect(() => {
+        if (!signedIn) Router.replace("/signin?redirect=/admin");
+        else if (!hasRole('Admin')) Router.replace("/forbidden");
+    }, [signedIn]);
+    if (!auth || !hasRole('Admin')) return <Redirecting />
 
     return (<Page title="Admin Page">
 
@@ -18,7 +23,7 @@ export default () => {
                 {(auth.roles || []).map(role => 
                 <span key={role} className="ml-3 inline-flex items-center px-3 py-0.5 rounded-full text-xs font-medium leading-5 bg-indigo-100 text-indigo-800">{role}</span>)}
             </div>
-            <Button className="mt-8" onClick={(e:any) => signout('/')}>Sign Out</Button>
+            <Button className="mt-8" onClick={(e:any) => signout()}>Sign Out</Button>
         </div>
 
     </Page>)

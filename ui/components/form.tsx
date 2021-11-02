@@ -1,14 +1,30 @@
 import Link from 'next/link'
 import { ErrorResponse, errorResponse, errorResponseExcept } from '@servicestack/client';
-import { createContext, FC, SyntheticEvent, useContext, useState } from 'react';
+import { createContext, FC, SyntheticEvent, useContext, useEffect, useState } from 'react';
 import { ExclamationCircleIcon } from '@heroicons/react/solid'
 import { XCircleIcon } from '@heroicons/react/solid'
-import { NextRouter, useRouter } from 'next/router';
+import Router, { NextRouter, useRouter } from 'next/router';
+import useAuth from '../lib/useAuth';
 
-type FormState = { loading:boolean, responseStatus?:ErrorResponse }
-export const FormContext = createContext<FormState>({ loading: false })
+export function getRedirect() {    
+    let { redirect } = Router.query
+    return redirect && Array.isArray(redirect)
+        ? redirect[0]
+        : redirect
+}
+
+export const Redirecting : FC<any> = (props) => {
+    return <Loading className="py-2 pl-4" text="redirecting ..." />
+}
+
+type FormState = { 
+    responseStatus?:ErrorResponse, 
+    didSubmit:boolean, 
+    loading:boolean,
+}
+export const FormContext = createContext<FormState>({ loading: false, didSubmit:false })
 export type SuccessContext<T> = { response?:T, router:NextRouter }
-export type SuccessEventHandler<T> = (ctx:SuccessContext<T>) => Promise<any>;
+export type SuccessEventHandler<T> = (ctx:SuccessContext<T>) => Promise<any> | void;
 
 type FormProps = {
     className?: string,
@@ -19,12 +35,17 @@ type FormProps = {
 }
 export const Form: FC<FormProps> = (props) => {
     const { className, method, onSubmit, onSuccess, children, ...remaining } = props
-    let [responseStatus, setResponseStatus] = useState<ErrorResponse|undefined>()
-    let [loading, setLoading] = useState(false)
-    let router = useRouter()
+    const [responseStatus, setResponseStatus] = useState<ErrorResponse|undefined>()
+    const [loading, setLoading] = useState(false)
+    const [didSubmit, setDidSubmit] = useState(false)
+    const router = useRouter()
+
+    const { mutate } = useAuth()
 
     const handleSubmit = async (e:SyntheticEvent<HTMLFormElement>) => {
         e.preventDefault()
+        setDidSubmit(true)
+
         if (onSubmit) {
             setLoading(true)
             try {
@@ -32,6 +53,8 @@ export const Form: FC<FormProps> = (props) => {
 
                 let response = await onSubmit(e)
                 if (onSuccess) {
+                    //mutate() //revalidate
+                    console.log('onSuccess', router.query, Router.query)
                     onSuccess({ response, router })
                 }
             } catch (e:any) {
@@ -42,9 +65,35 @@ export const Form: FC<FormProps> = (props) => {
             }
         }
     }
-    return (<FormContext.Provider value={{ loading, responseStatus }}>
+    return (<FormContext.Provider value={{ loading, responseStatus, didSubmit }}>
         <form method={method ?? 'POST'} className={className} onSubmit={handleSubmit} {...remaining}>{children}</form>
     </FormContext.Provider>)
+}
+
+export const IfAuthenticated : FC<{ redirectTo: string }> = ({ redirectTo }) => {
+    const { auth } = useAuth()
+    const router = useRouter()
+    const ctx = useContext(FormContext);
+
+    useEffect(() => {
+        if (ctx && ctx.didSubmit) return;
+        if (auth) router.push(redirectTo);
+    }, [auth])
+
+    return null
+}
+
+export const IfNotAuthenticated : FC<{ redirectTo: string }> = ({ redirectTo }) => {
+    const { auth } = useAuth()
+    const router = useRouter()
+    const ctx = useContext(FormContext);
+
+    useEffect(() => {
+        if (ctx && ctx.didSubmit) return;
+        if (!auth) router.push(redirectTo);
+    }, [auth])
+
+    return null
 }
 
 type ErrorSummaryProps = {
@@ -179,15 +228,18 @@ export const Button: FC<ButtonProps> = (props) => {
         : <button type={type ?? "submit"} className={cls} {...remaining}>{children}</button>
 }
 
-type FormLoadingProps = {
+type LoadingProps = {
     className?: string,
     icon?: boolean,
     text?: string,
 }
-export const FormLoading: FC<FormLoadingProps> = ({ className, icon, text }) => {
-    const ctx = useContext(FormContext);
-    if (!ctx.loading) return null;
+export const FormLoading: FC<LoadingProps> = (props) => {
+    const ctx = useContext(FormContext)
+    if (!ctx.loading) return null
+    return Loading(props)
+}
 
+export const Loading : FC<LoadingProps> = ({ className, icon, text }) => {
     const showIcon = icon || icon === undefined;
     const showText = text === undefined ? "loading..." : text;
     let cls = ["flex", className];

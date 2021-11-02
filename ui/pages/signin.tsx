@@ -1,10 +1,11 @@
 import Page from '../components/layout-page'
-import { Form, FormLoading, ErrorSummary, Input, Checkbox, Button, PrimaryButton } from '../components/form'
+import { Form, FormLoading, ErrorSummary, Input, Checkbox, Button, PrimaryButton, getRedirect, Redirecting } from '../components/form'
 import { client } from '../lib/gateway'
 import { Authenticate } from '../lib/dtos'
 import { useEffect, useState } from 'react'
 import { serializeToObject } from '@servicestack/client'
 import useAuth from '../lib/useAuth'
+import Router from 'next/router'
 
 export default () => {
 
@@ -16,8 +17,12 @@ export default () => {
         setPasswordValue('p@55wOrd')
     }
 
-    useAuth({ ifAuthenticatedRedirectTo:'/' })
-    
+    const { signedIn, mutate } = useAuth();
+    useEffect(() => {
+        if (signedIn) Router.replace(getRedirect() || "/");
+    }, [signedIn]);
+    if (signedIn) return <Redirecting />
+
     return (
         <Page title="Sign In">
             <Form className="max-w-prose" 
@@ -25,7 +30,7 @@ export default () => {
                       const { userName, password, rememberMe } = serializeToObject(e.currentTarget); 
                       return client.post(new Authenticate({ userName, password, rememberMe }))
                   }}
-                  onSuccess={async ctx => ctx.router.push('/about')}>
+                  onSuccess={ctx => mutate()}>
                 <div className="shadow overflow-hidden sm:rounded-md">
                     <ErrorSummary except="userName,password" />
                     <div className="px-4 py-5 bg-white space-y-6 sm:p-6">

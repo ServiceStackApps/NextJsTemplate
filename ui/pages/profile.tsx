@@ -1,12 +1,16 @@
 import Page from '../components/layout-page'
 import useAuth from '../lib/useAuth'
+import Router from 'next/router'
 import { UserIcon } from '@heroicons/react/outline'
-import React from 'react'
-import { Button } from '../components/form'
+import React, { useEffect } from 'react'
+import { Button, Redirecting } from '../components/form'
 
 export default () => {
-    let { auth, signout } = useAuth({ redirectTo:'/signin' })
-    if (!auth) return null
+    const { auth, signedIn, signout } = useAuth();
+    useEffect(() => {
+        if (!signedIn) Router.replace("/signin?redirect=/profile");
+    }, [signedIn]);
+    if (!auth) return <Redirecting />
 
     return (<Page title={auth?.displayName + ' Profile'}>
 

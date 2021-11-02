@@ -8,21 +8,14 @@ const KEY = "/api/Authenticate"
 const FORBIDDEN_PATH = "/forbidden"
 
 type Props = {
-    redirectTo?: string,
-    ifAuthenticatedRedirectTo?: string,
-    requiredRole?: string,
-    requiredPermission?: string,
 }
 export default function useAuth({ 
-  redirectTo, 
-  ifAuthenticatedRedirectTo,
-  requiredRole,
-  requiredPermission,
 }: Props = {}) {
-  const { data, mutate, error } = useSWR(KEY, key => client.post(new Authenticate()))
+  const { data:auth, mutate, error } = useSWR(KEY, key => client.post(new Authenticate()))
   const { cache } = useSWRConfig();
-  let auth = data as AuthenticateResponse
-  const loading = auth === undefined && error === undefined
+  const loading = error === undefined && auth === undefined
+  const signedIn = error === undefined && auth !== undefined
+  
   let attrs:string[] = []
   if (!loading && auth) {
     (auth.roles || []).forEach(role => attrs.push(`role:${role}`));
@@ -30,27 +23,16 @@ export default function useAuth({
   }
 
   async function signout(redirectTo?:string) {
+    await client.post(new Authenticate({ provider: 'logout' }));
+    (cache as any).delete(KEY);
+    mutate(); // revalidate
     if (redirectTo) {
       Router.push(redirectTo)
     }
-    await client.post(new Authenticate({ provider: 'logout' }));
-    (cache as any).delete(KEY);
-    mutate(undefined, true);    // revalidate
   }
-  
-  function handleAuth() {
-    if (loading) return
-    if (!auth && redirectTo) {
-      Router.push(redirectTo) 
-    } else if (auth && ifAuthenticatedRedirectTo) {
-      Router.push(ifAuthenticatedRedirectTo) 
-    } else if (requiredRole && (auth?.roles || []).indexOf(requiredRole) == -1) {
-      Router.push(FORBIDDEN_PATH) 
-    } else if (requiredPermission && (auth?.permissions || []).indexOf(requiredPermission) == -1) {
-      Router.push(FORBIDDEN_PATH) 
-    }
-  }
-  useEffect(handleAuth, [auth, loading])
 
-  return { auth, attrs, loading, signout }
+  const hasRole = (role:string) => (auth?.roles || []).indexOf(role) >= 0;
+  const hasPermission = (permission:string) => (auth?.permissions || []).indexOf(permission) >= 0;
+  
+  return { auth, signedIn, attrs, loading, signout, mutate, hasRole, hasPermission }
 }
