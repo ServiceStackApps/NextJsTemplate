@@ -17,8 +17,7 @@ public class AppHost : AppHostBase
         });
 
         Plugins.Add(new SharpPagesFeature());
-//#if DEBUG
-        Plugins.Add(new CorsFeature(allowOriginWhitelist:new[]{ "http://localhost:3000" }));
-//#endif
+        Plugins.Add(new CorsFeature(allowOriginWhitelist:new[]{ 
+            "http://localhost:3000", "https://nextjs-gh.web-templates.io" }));
     }
 }
