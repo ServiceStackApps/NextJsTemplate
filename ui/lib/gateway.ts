@@ -5,5 +5,5 @@ export const Routes = {
     forbidden: () => '/forbidden',
 };
 
-export const client = new JsonServiceClient()
+export const client = new JsonServiceClient(process.env.apiBaseUrl)
     .useBasePath("/api");
