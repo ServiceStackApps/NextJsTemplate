@@ -2,6 +2,7 @@
 
 # dotnet
 /wwwroot
+wwwroot/
 
 # dependencies
 /node_modules
