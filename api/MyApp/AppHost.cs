@@ -13,11 +13,10 @@ public class AppHost : AppHostBase
         RawHttpHandlers.Add(ApiHandlers.Json("/api/{Request}"));
 
         SetConfig(new HostConfig {
-
         });
 
         Plugins.Add(new SharpPagesFeature());
         Plugins.Add(new CorsFeature(allowOriginWhitelist:new[]{ 
-            "http://localhost:3000", "https://nextjs-gh.web-templates.io" }));
+            "http://localhost:3000", "https://nextjs-gh.web-templates.io" }, allowCredentials:true));
     }
 }
