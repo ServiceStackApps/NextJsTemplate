@@ -7,6 +7,15 @@ jobs:
     runs-on: ubuntu-20.04
     steps:
     - uses: actions/checkout@v2
+    - name: Setup node
+      uses: actions/setup-node@v1
+      with:
+        node-version: 14
+    - name: Install and build npm
+      run: |
+        npm install
+        npm run export
+      working-directory: ./ui
     - name: Setup dotnet
       uses: actions/setup-dotnet@v1
       with:
@@ -16,3 +25,18 @@ jobs:
       run: dotnet build ./api
     - name: Test
       run: dotnet test ./api/MyApp.Tests
+    - name: Deploy to GitHub Pages
+      run: |
+        cd ./api/MyApp/wwwroot
+        git init
+        git add -A
+        git config --local user.email "action@github.com"
+        git config --local user.name "GitHub Action"
+        git commit -m 'deploy'
+    - name: Force push to destination branch
+      uses: ad-m/github-push-action@v0.5.0
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        branch: gh-pages
+        force: true
+        directory: ./api/MyApp/wwwroot
