@@ -18,5 +18,5 @@ module.exports = {
     },
 
     // Use the CDN in production and localhost for development.
-    assetPrefix: isProd ? 'https://servicestackapps.github.io/NextJsTemplate' : '',
+    assetPrefix: isProd ? 'http://nextjs-gh.web-templates.io' : '',
 }
