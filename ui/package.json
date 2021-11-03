@@ -4,7 +4,7 @@
     "dev": "next",
     "build": "next build",
     "dtos": "cd lib && x ts",
-    "export": "next build && next export -o ../api/MyApp/wwwroot",
+    "publish": "next build && next export -o ../api/MyApp/wwwroot",
     "start": "next start",
     "typecheck": "tsc"
   },

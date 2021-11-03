@@ -14,7 +14,7 @@ jobs:
     - name: Install and build npm
       run: |
         npm install
-        npm run export
+        npm run publish
       working-directory: ./ui
     - name: Setup dotnet
       uses: actions/setup-dotnet@v1
