@@ -1,3 +1,6 @@
+const PROD_API = 'https://nextjs.web-templates.io'
+const PROD_CDN = 'https://nextjs-gh.web-templates.io'
+
 const isProd = process.env.NODE_ENV === 'production'
 
 module.exports = {
@@ -14,9 +17,9 @@ module.exports = {
     },
 
     env: {
-        apiBaseUrl: isProd ? 'https://nextjs.web-templates.io/' : '/'
+        apiBaseUrl: isProd ? PROD_API : '/'
     },
 
     // Use the CDN in production and localhost for development.
-    assetPrefix: isProd ? 'https://nextjs-gh.web-templates.io' : '',
+    assetPrefix: isProd ? PROD_CDN : '',
 }

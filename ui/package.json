@@ -5,6 +5,7 @@
     "build": "next build",
     "dtos": "cd lib && x ts",
     "publish": "next build && next export -o ../api/MyApp/wwwroot",
+    "publish:dev": "cross-env NODE_ENV=development next build && next export -o ../api/MyApp/wwwroot",
     "start": "next start",
     "typecheck": "tsc"
   },
@@ -14,7 +15,7 @@
     "classnames": "2.3.1",
     "date-fns": "2.21.3",
     "gray-matter": "4.0.3",
-    "next": "latest",
+    "next": "^11.1.2",
     "react": "^17.0.2",
     "react-dom": "^17.0.2",
     "remark": "13.0.0",
@@ -28,6 +29,7 @@
     "@types/react": "^17.0.6",
     "@types/react-dom": "^17.0.5",
     "autoprefixer": "^10.2.5",
+    "cross-env": "^7.0.3",
     "postcss": "^8.3.0",
     "tailwindcss": "^2.1.2"
   }

@@ -27,7 +27,7 @@ export default () => {
         <Form className="max-w-prose" 
                 onSubmit={e => { 
                     const { userName, password, rememberMe } = serializeToObject(e.currentTarget); 
-                    return client.post(new Authenticate({ userName, password, rememberMe }))
+                    return client.post(new Authenticate({ provider:'credentials', userName, password, rememberMe }))
                 }}
                 onSuccess={ctx => revalidate()}>
             <div className="shadow overflow-hidden sm:rounded-md">
