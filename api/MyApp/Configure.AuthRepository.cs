@@ -1,12 +1,11 @@
 using System;
-using System.Collections.Generic;
-using Microsoft.Extensions.DependencyInjection;
 using ServiceStack;
 using ServiceStack.Web;
 using ServiceStack.Data;
 using ServiceStack.Auth;
 using ServiceStack.Configuration;
-using ServiceStack.OrmLite;
+
+[assembly: HostingStartup(typeof(MyApp.ConfigureAuthRepository))]
 
 namespace MyApp
 {
@@ -20,42 +19,35 @@ namespace MyApp
 
     public class AppUserAuthEvents : AuthEvents
     {
-        public override void OnAuthenticated(IRequest req, IAuthSession session, IServiceBase authService, 
-            IAuthTokens tokens, Dictionary<string, string> authInfo)
+        public override async Task OnAuthenticatedAsync(IRequest httpReq, IAuthSession session, IServiceBase authService, 
+            IAuthTokens tokens, Dictionary<string, string> authInfo, CancellationToken token = default)
         {
-            var authRepo = HostContext.AppHost.GetAuthRepository(req);
+            var authRepo = HostContext.AppHost.GetAuthRepositoryAsync(httpReq);
             using (authRepo as IDisposable)
             {
-                var userAuth = (AppUser)authRepo.GetUserAuth(session.UserAuthId);
+                var userAuth = (AppUser)await authRepo.GetUserAuthAsync(session.UserAuthId, token);
                 userAuth.ProfileUrl = session.GetProfileUrl();
-                userAuth.LastLoginIp = req.UserHostAddress;
+                userAuth.LastLoginIp = httpReq.UserHostAddress;
                 userAuth.LastLoginDate = DateTime.UtcNow;
-                authRepo.SaveUserAuth(userAuth);
+                await authRepo.SaveUserAuthAsync(userAuth, token);
             }
         }
     }
 
-    public class ConfigureAuthRepository : IConfigureAppHost, IConfigureServices, IPreInitPlugin
+    public class ConfigureAuthRepository : IHostingStartup
     {
-        public void Configure(IServiceCollection services)
-        {
-            services.AddSingleton<IAuthRepository>(c =>
+        public void Configure(IWebHostBuilder builder) => builder
+            .ConfigureServices(services => services.AddSingleton<IAuthRepository>(c =>
                 new OrmLiteAuthRepository<AppUser, UserAuthDetails>(c.Resolve<IDbConnectionFactory>()) {
                     UseDistinctRoleTables = true
-                });            
-        }
-
-        public void Configure(IAppHost appHost)
-        {
-            var authRepo = appHost.Resolve<IAuthRepository>();
-            authRepo.InitSchema();
-            CreateUser(authRepo, "admin@email.com", "Admin User", "p@55wOrd", roles:new[]{ RoleNames.Admin });
-        }
-
-        public void BeforePluginsLoaded(IAppHost appHost)
-        {
-            appHost.AssertPlugin<AuthFeature>().AuthEvents.Add(new AppUserAuthEvents());
-        }
+                }))
+            .ConfigureAppHost(appHost => {
+                var authRepo = appHost.Resolve<IAuthRepository>();
+                authRepo.InitSchema();
+                CreateUser(authRepo, "admin@email.com", "Admin User", "p@55wOrd", roles:new[]{ RoleNames.Admin });
+            }, afterConfigure: appHost => {
+                appHost.AssertPlugin<AuthFeature>().AuthEvents.Add(new AppUserAuthEvents());
+            });
 
         // Add initial Users to the configured Auth Repository
         public void CreateUser(IAuthRepository authRepo, string email, string name, string password, string[] roles)

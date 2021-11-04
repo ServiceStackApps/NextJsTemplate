@@ -1,7 +1,10 @@
 using Microsoft.Extensions.DependencyInjection;
 using ServiceStack;
+using ServiceStack.Caching;
 using ServiceStack.Auth;
 using ServiceStack.FluentValidation;
+
+[assembly: HostingStartup(typeof(MyApp.ConfigureAuth))]
 
 namespace MyApp
 {
@@ -23,28 +26,30 @@ namespace MyApp
         }
     }
 
-    public class ConfigureAuth : IConfigureAppHost, IConfigureServices
+    public class ConfigureAuth : IHostingStartup
     {
-        public void Configure(IServiceCollection services)
-        {
-            //services.AddSingleton<ICacheClient>(new MemoryCacheClient()); //Store User Sessions in Memory Cache (default)
-        }
+        public void Configure(IWebHostBuilder builder) => builder
+            //.ConfigureServices(services => services.AddSingleton<ICacheClient>(new MemoryCacheClient()))
+            .ConfigureAppHost(appHost => { 
+                var appSettings = appHost.AppSettings;
+                appHost.Plugins.Add(new AuthFeature(() => new CustomUserSession(),
+                    new IAuthProvider[] {
+                        new JwtAuthProvider(appSettings) {
+                            RequireSecureConnection = !appHost.IsDevelopmentEnvironment(),
+                            AuthKey = AesUtils.CreateKey(),
+                            UseTokenCookie = true,
+                        },
+                        new CredentialsAuthProvider(appSettings), /* Sign In with Username / Password credentials */
+                        new FacebookAuthProvider(appSettings), /* Create App https://developers.facebook.com/apps */
+                        new GoogleAuthProvider(
+                            appSettings), /* Create App https://console.developers.google.com/apis/credentials */
+                        new MicrosoftGraphAuthProvider(appSettings), /* Create App https://apps.dev.microsoft.com */
+                    }));
 
-        public void Configure(IAppHost appHost)
-        {
-            var AppSettings = appHost.AppSettings;
-            appHost.Plugins.Add(new AuthFeature(() => new CustomUserSession(),
-                new IAuthProvider[] {
-                    new CredentialsAuthProvider(AppSettings),     /* Sign In with Username / Password credentials */
-                    new FacebookAuthProvider(AppSettings),        /* Create App https://developers.facebook.com/apps */
-                    new GoogleAuthProvider(AppSettings),          /* Create App https://console.developers.google.com/apis/credentials */
-                    new MicrosoftGraphAuthProvider(AppSettings),  /* Create App https://apps.dev.microsoft.com */
-                }));
+                appHost.Plugins.Add(new RegistrationFeature()); //Enable /register Service
 
-            appHost.Plugins.Add(new RegistrationFeature()); //Enable /register Service
-
-            //override the default registration validation with your own custom implementation
-            appHost.RegisterAs<CustomRegistrationValidator, IValidator<Register>>();
-        }
+                //override the default registration validation with your own custom implementation
+                appHost.RegisterAs<CustomRegistrationValidator, IValidator<Register>>();
+            });
     }
 }

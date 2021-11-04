@@ -2,8 +2,6 @@ using MyApp;
 using ServiceStack;
 
 var builder = WebApplication.CreateBuilder(args);
-
-builder.Services.AddModularStartup<AppHost>(builder.Configuration);
 builder.Services.ConfigureNonBreakingSameSiteCookies(builder.Environment);
 
 var app = builder.Build();
