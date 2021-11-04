@@ -13,10 +13,12 @@ public class AppHost : AppHostBase
         RawHttpHandlers.Add(ApiHandlers.Json("/api/{Request}"));
 
         SetConfig(new HostConfig {
+            AllowFileExtensions = { "webmanifest" },
         });
 
         Plugins.Add(new SharpPagesFeature());
         Plugins.Add(new CorsFeature(allowOriginWhitelist:new[]{ 
-            "http://localhost:3000", "https://nextjs-gh.web-templates.io" }, allowCredentials:true));
+            "https://localhost:5001","http://localhost:5000","http://localhost:3000","https://nextjs-gh.web-templates.io"
+        }, allowCredentials:true));
     }
 }
