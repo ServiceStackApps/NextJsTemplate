@@ -2,6 +2,10 @@
 
 # dotnet
 wwwroot/
+#sqlite
+*.db
+*.db-shm
+*.db-wal
 
 # dependencies
 /node_modules
