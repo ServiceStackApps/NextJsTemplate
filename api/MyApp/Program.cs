@@ -1,8 +1,4 @@
-using MyApp;
-using ServiceStack;
-
 var builder = WebApplication.CreateBuilder(args);
-builder.Services.ConfigureNonBreakingSameSiteCookies(builder.Environment);
 
 var app = builder.Build();
 
@@ -14,7 +10,5 @@ if (!app.Environment.IsDevelopment())
     app.UseHsts();
     app.UseHttpsRedirection();
 }
-
-app.UseServiceStack(new AppHost());
 
 app.Run();

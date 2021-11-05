@@ -2,9 +2,11 @@ using Funq;
 using ServiceStack;
 using MyApp.ServiceInterface;
 
+[assembly: HostingStartup(typeof(MyApp.AppHost))]
+
 namespace MyApp;
 
-public class AppHost : AppHostBase
+public class AppHost : AppHostBase, IHostingStartup
 {
     public AppHost() : base("MyApp", typeof(MyServices).Assembly) {}
 
@@ -12,13 +14,18 @@ public class AppHost : AppHostBase
     {
         RawHttpHandlers.Add(ApiHandlers.Json("/api/{Request}"));
 
-        SetConfig(new HostConfig {
-            AllowFileExtensions = { "webmanifest" },
-        });
-
         Plugins.Add(new SharpPagesFeature());
         Plugins.Add(new CorsFeature(allowOriginWhitelist:new[]{ 
             "https://localhost:5001","http://localhost:5000","http://localhost:3000","https://nextjs-gh.web-templates.io"
         }, allowCredentials:true));
     }
+
+    public void Configure(IWebHostBuilder builder) => builder
+        .ConfigureServices((context, services) => 
+            services.ConfigureNonBreakingSameSiteCookies(context.HostingEnvironment))
+        .Configure(app => {
+            var alreadyStarted = Instance != null;
+            if (alreadyStarted) return;
+            app.UseServiceStack(new AppHost());
+        });
 }

@@ -2,6 +2,7 @@
 
 # dotnet
 wwwroot/
+*.user
 #sqlite
 *.db
 *.db-shm
