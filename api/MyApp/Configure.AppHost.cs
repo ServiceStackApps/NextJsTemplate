@@ -13,6 +13,10 @@ public class AppHost : AppHostBase, IHostingStartup
     public override void Configure(Container container)
     {
         RawHttpHandlers.Add(ApiHandlers.Json("/api/{Request}"));
+        
+        SetConfig(new HostConfig {
+            AllowFileExtensions = { "json" }
+        });
 
         Plugins.Add(new SharpPagesFeature());
         Plugins.Add(new CorsFeature(allowOriginWhitelist:new[]{ 
@@ -24,8 +28,7 @@ public class AppHost : AppHostBase, IHostingStartup
         .ConfigureServices((context, services) => 
             services.ConfigureNonBreakingSameSiteCookies(context.HostingEnvironment))
         .Configure(app => {
-            var alreadyStarted = Instance != null;
-            if (alreadyStarted) return;
+            if (HasInit) return;
             app.UseServiceStack(new AppHost());
         });
 }
