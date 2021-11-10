@@ -40,10 +40,12 @@ jobs:
         run: echo "image_repository_name=$(echo ${{ github.repository }} | tr '[:upper:]' '[:lower:]')" >> $GITHUB_ENV
       - name: Assign version
         run: |
-          if [ "${{ github.event.inputs.version }}" = "" ]; then
-            echo "VERSION=latest" >> $GITHUB_ENV
-          else
-            echo "VERSION=${{ github.event.inputs.version }}" >> $GITHUB_ENV
+          echo "TAG_NAME=latest" >> $GITHUB_ENV
+          if [ "${{ github.event.release.tag_name }} != "" ]; then
+            echo "TAG_NAME=${{ github.event.release.tag_name }}" >> $GITHUB_ENV
+          fi;
+          if [ "${{ github.event.inputs.version }} != "" ]; then
+            echo "TAG_NAME=${{ github.event.inputs.version }}" >> $GITHUB_ENV
           fi;
       
       - name: Login to GitHub Container Registry
@@ -59,7 +61,7 @@ jobs:
           file: Dockerfile
           context: .
           push: true
-          tags: ghcr.io/${{ env.image_repository_name }}:${{ env.VERSION }}
+          tags: ghcr.io/${{ env.image_repository_name }}:${{ env.TAG_NAME }}
 
       - name: Deploy to GitHub Pages
         run: |
@@ -95,16 +97,18 @@ jobs:
           echo "image_repository_name=$(echo ${{ github.repository }} | tr '[:upper:]' '[:lower:]')" >> $GITHUB_ENV
           echo "domain=${{ secrets.DEPLOY_HOST }}" >> $GITHUB_ENV
           echo "letsencrypt_email=${{ secrets.LETSENCRYPT_EMAIL }}" >> $GITHUB_ENV
-          if [ "${{ github.event.inputs.version }}" = "" ]; then
-            echo "VERSION=latest" >> $GITHUB_ENV
-          else
-            echo "VERSION=${{ github.event.inputs.version }}" >> $GITHUB_ENV
+          echo "TAG_NAME=latest" >> $GITHUB_ENV
+          if [ "${{ github.event.release.tag_name }} != "" ]; then
+            echo "TAG_NAME=${{ github.event.release.tag_name }}" >> $GITHUB_ENV
+          fi;
+          if [ "${{ github.event.inputs.version }} != "" ]; then
+            echo "TAG_NAME=${{ github.event.inputs.version }}" >> $GITHUB_ENV
           fi;
 
       - name: docker-compose file prep
         uses: danielr1996/envsubst-action@1.0.0
         env:
-          RELEASE_VERSION: ${{ env.VERSION }}
+          RELEASE_VERSION: ${{ env.TAG_NAME }}
           IMAGE_REPO: ${{ env.image_repository_name }}
           HOST_DOMAIN: ${{ env.domain }}
           LETSENCRYPT_EMAIL: ${{ env.letsencrypt_email }}
