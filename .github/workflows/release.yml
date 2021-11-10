@@ -41,10 +41,10 @@ jobs:
       - name: Assign version
         run: |
           echo "TAG_NAME=latest" >> $GITHUB_ENV
-          if [ "${{ github.event.release.tag_name }} != "" ]; then
+          if [ "${{ github.event.release.tag_name }}" != "" ]; then
             echo "TAG_NAME=${{ github.event.release.tag_name }}" >> $GITHUB_ENV
           fi;
-          if [ "${{ github.event.inputs.version }} != "" ]; then
+          if [ "${{ github.event.inputs.version }}" != "" ]; then
             echo "TAG_NAME=${{ github.event.inputs.version }}" >> $GITHUB_ENV
           fi;
       
@@ -98,10 +98,10 @@ jobs:
           echo "domain=${{ secrets.DEPLOY_HOST }}" >> $GITHUB_ENV
           echo "letsencrypt_email=${{ secrets.LETSENCRYPT_EMAIL }}" >> $GITHUB_ENV
           echo "TAG_NAME=latest" >> $GITHUB_ENV
-          if [ "${{ github.event.release.tag_name }} != "" ]; then
+          if [ "${{ github.event.release.tag_name }}" != "" ]; then
             echo "TAG_NAME=${{ github.event.release.tag_name }}" >> $GITHUB_ENV
           fi;
-          if [ "${{ github.event.inputs.version }} != "" ]; then
+          if [ "${{ github.event.inputs.version }}" != "" ]; then
             echo "TAG_NAME=${{ github.event.inputs.version }}" >> $GITHUB_ENV
           fi;
 
