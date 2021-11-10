@@ -95,9 +95,11 @@ jobs:
           echo "image_repository_name=$(echo ${{ github.repository }} | tr '[:upper:]' '[:lower:]')" >> $GITHUB_ENV
           echo "domain=${{ secrets.DEPLOY_HOST }}" >> $GITHUB_ENV
           echo "letsencrypt_email=${{ secrets.LETSENCRYPT_EMAIL }}" >> $GITHUB_ENV
-          echo ::set-output name=VERSION::$(if [ "${{ github.event.inputs.version }}" = "" ]; \
-          then echo "latest" \
-          else echo "${{ github.event.inputs.version }}"; fi)
+          if [ "${{ github.event.inputs.version }}" = "" ]; then
+            echo "VERSION=latest" >> $GITHUB_ENV
+          else
+            echo "VERSION=${{ github.event.inputs.version }}" >> $GITHUB_ENV
+          fi;
 
       - name: docker-compose file prep
         uses: danielr1996/envsubst-action@1.0.0
