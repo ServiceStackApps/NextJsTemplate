@@ -1,12 +1,15 @@
 name: Release
 on:
+  # Triggered on new GitHub Release
   release:
     types: [published]
+  # Triggered on every successful Build action
   workflow_run:
-    workflows: ["Build Server"]
+    workflows: ["Build"]
     branches: [main,master]
     types:
       - completed
+  # Manual trigger for rollback to specific release or redeploy latest
   workflow_dispatch:
     inputs:
       version:
@@ -18,6 +21,7 @@ jobs:
   push_to_registry:
     runs-on: ubuntu-20.04
     steps:
+      # Checkout latest or specific tag
       - name: checkout
         if: ${{ github.event.inputs.version == '' || github.event.inputs.version == 'latest' }}
         uses: actions/checkout@v2
@@ -30,14 +34,16 @@ jobs:
         uses: actions/setup-node@v1
         with:
           node-version: 14
+      # Build UI which is copied to local server wwwroot directory to match content
       - name: Install and build npm
         run: |
           npm install
           npm run publish
         working-directory: ./ui
-          
+      # Assign environment variables used in subsequent steps
       - name: repository name fix
         run: echo "image_repository_name=$(echo ${{ github.repository }} | tr '[:upper:]' '[:lower:]')" >> $GITHUB_ENV
+      # TAG_NAME defaults to 'latest' if not a release or manual deployment
       - name: Assign version
         run: |
           echo "TAG_NAME=latest" >> $GITHUB_ENV
@@ -47,14 +53,15 @@ jobs:
           if [ "${{ github.event.inputs.version }}" != "" ]; then
             echo "TAG_NAME=${{ github.event.inputs.version }}" >> $GITHUB_ENV
           fi;
-      
+
+      # Authenticate, build and push to GitHub Container Registry (ghcr.io)
       - name: Login to GitHub Container Registry
         uses: docker/login-action@v1
         with:
           registry: ghcr.io
           username: ${{ github.repository_owner }}
           password: ${{ secrets.CR_PAT }}
-      
+
       - name: Build and push Docker images
         uses: docker/build-push-action@v2.2.2
         with:
@@ -63,6 +70,7 @@ jobs:
           push: true
           tags: ghcr.io/${{ env.image_repository_name }}:${{ env.TAG_NAME }}
 
+      # Deploy NextJS UI to GitHub Pages
       - name: Deploy to GitHub Pages
         run: |
           cd ./api/MyApp/wwwroot
@@ -83,6 +91,7 @@ jobs:
     needs: push_to_registry
     runs-on: ubuntu-20.04
     steps:
+      # Checkout latest or specific tag
       - name: checkout
         if: ${{ github.event.inputs.version == '' || github.event.inputs.version == 'latest' }}
         uses: actions/checkout@v2
@@ -92,6 +101,7 @@ jobs:
         with:
           ref: refs/tags/${{ github.event.inputs.version }}
 
+      # Assign environment variables used in subsequent steps
       - name: repository name fix and env
         run: |
           echo "image_repository_name=$(echo ${{ github.repository }} | tr '[:upper:]' '[:lower:]')" >> $GITHUB_ENV
@@ -105,6 +115,7 @@ jobs:
             echo "TAG_NAME=${{ github.event.inputs.version }}" >> $GITHUB_ENV
           fi;
 
+      # Populate docker-compose.yml with variables from build process, including TAG_NAME.
       - name: docker-compose file prep
         uses: danielr1996/envsubst-action@1.0.0
         env:
@@ -116,6 +127,7 @@ jobs:
           input: .deploy/docker-compose-template.yml
           output: .deploy/MyApp-docker-compose.yml
 
+      # Copy only the docker-compose.yml to remote server home folder
       - name: copy compose file via scp
         uses: appleboy/scp-action@v0.1.1
         with:
@@ -131,6 +143,7 @@ jobs:
           echo "GH_TOKEN=${{ secrets.CR_PAT }}" >> $GITHUB_ENV
           echo "USERNAME=${{ secrets.DEPLOY_USERNAME }}" >> $GITHUB_ENV
 
+      # Deploy Docker image with ServiceStack application using `docker compose up` remotely
       - name: remote docker-compose up via ssh
         uses: appleboy/ssh-action@v0.1.4
         env:
