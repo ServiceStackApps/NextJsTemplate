@@ -20,7 +20,10 @@ public class AppHost : AppHostBase, IHostingStartup
 
         Plugins.Add(new SharpPagesFeature());
         Plugins.Add(new CorsFeature(allowOriginWhitelist:new[]{ 
-            "https://localhost:5001","http://localhost:5000","http://localhost:3000","https://nextjs-gh.web-templates.io"
+            "https://localhost:5001",
+            "http://localhost:5000",
+            "http://localhost:3000",
+            "https://nextjs-gh.web-templates.io"
         }, allowCredentials:true));
     }
 
